@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# prisma ORM
+/src/generated/prisma
+
+# local file
+src/certs/private.pem
+src/certs/public.pem
