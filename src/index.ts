@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import './certs/generate-keys.ts';
 import { authRoutes } from './routes/auth.routes.ts';
 import prismaPlugin from './plugins/prisma.ts';
+import errorHandlerPlugin from './plugins/error-handler.ts';
 
 dotenv.config();
 
@@ -12,6 +13,9 @@ const server = fastify({
 
 // register prisma field
 await server.register(prismaPlugin);
+
+// Register Error Handler
+await server.register(errorHandlerPlugin);
 
 // add router with prefix
 const PORT = Number(process.env.PORT) || 8081;

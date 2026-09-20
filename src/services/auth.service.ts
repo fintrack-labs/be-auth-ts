@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { RegisterBodyInput } from "../dto/auth.dto.ts";
 import { hashPassword } from "../utils/crypto.ts";
+import { ConflictError } from "../errors/app.error.ts";
 
 export type RolePrefix = '12' | '10' | '01';
 
@@ -66,9 +67,7 @@ export async function registerUserService(fastify: FastifyInstance, payload: Reg
     });
 
     if (existingUser) {
-        const error: any = new Error('Email already registered');
-        error.statusCode = 409;
-        throw error;
+        throw new ConflictError('Email already registered');
     }
 
     const passwordHash = await hashPassword(password);
