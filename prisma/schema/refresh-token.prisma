@@ -1,0 +1,21 @@
+model RefreshToken {
+  tokenId   String   @id @map("token_id") @db.VarChar(64)
+  userId    String   @map("user_id") @db.VarChar(64)
+  clientId  String   @map("client_id") @db.VarChar(50)
+  tokenHash String   @unique @map("token_hash") @db.VarChar(255)
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  createdBy String?   @map("created_by") @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String?   @map("updated_by") @db.VarChar(50)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy String?   @map("deleted_by") @db.VarChar(50)
+  isDeleted Boolean   @default(false) @map("is_deleted")
+
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}

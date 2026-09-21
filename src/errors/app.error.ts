@@ -27,3 +27,9 @@ export class ConflictError extends AppError {
         super(message, 409);
     }
 }
+
+export class UnauthorizedError extends AppError {
+    constructor(message: string = 'Invalid credentials') {
+        super(message, 401);
+    }
+}

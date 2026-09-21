@@ -14,7 +14,8 @@ model User {
   deletedBy String?  @map("deleted_by") @db.VarChar(50)
   isDeleted Boolean  @default(false) @map("is_deleted")
 
-  userGroups UserGroup[]
+  userGroups    UserGroup[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
 }
