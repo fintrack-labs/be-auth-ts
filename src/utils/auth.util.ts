@@ -33,7 +33,11 @@ export async function generateAccessToken(payload: JwtPayloadInput) {
         adGroup: payload.adGroup || [],
         clientId: payload.clientId,
     })
-        .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+        .setProtectedHeader({
+            alg: 'RS256',
+            typ: 'JWT',
+            kid: process.env.TOKEN_KID
+        })
         .setSubject(payload.userId)
         .setIssuedAt()
         .setIssuer('fintrack-be-auth')
