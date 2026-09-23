@@ -123,6 +123,7 @@ export async function loginUserService(fastify: FastifyInstance, input: loginBod
 
     const accessToken = await generateAccessToken({
         userId: user.userId,
+        name: user.name,
         email: user.email,
         adGroup: [],
         clientId: client.clientId,
@@ -218,7 +219,8 @@ export async function refreshTokenService(fastify: FastifyInstance, input: refre
             userId: refreshToken.userId,
         },
         select: {
-            email: true
+            email: true,
+            name: true,
         }
     });
 
@@ -228,6 +230,7 @@ export async function refreshTokenService(fastify: FastifyInstance, input: refre
 
     const accessToken = await generateAccessToken({
         userId: refreshToken.userId,
+        name: userData.name,
         email: userData.email,
         adGroup: [],
         clientId: input.clientId,

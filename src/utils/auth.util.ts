@@ -10,8 +10,9 @@ export async function verifyPassword(password: string, storedHash: string): Prom
 export interface JwtPayloadInput {
     userId: string;
     email: string;
-    adGroup?: string[];
+    adGroup: string[];
     clientId: string;
+    name: string
 }
 export async function generateAccessToken(payload: JwtPayloadInput) {
     const envCertPath = process.env.JWT_PRIVATE_KEY;
@@ -29,9 +30,7 @@ export async function generateAccessToken(payload: JwtPayloadInput) {
 
     const privateKey = await jose.importPKCS8(privateKeyPem, 'RS256');
     return await new jose.SignJWT({
-        email: payload.email,
-        adGroup: payload.adGroup || [],
-        clientId: payload.clientId,
+        ...payload,
     })
         .setProtectedHeader({
             alg: 'RS256',
