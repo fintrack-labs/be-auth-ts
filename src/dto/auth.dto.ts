@@ -39,6 +39,7 @@ export const LoginBodyDto = Type.Object({
     email: Type.String({ format: 'email' }),
     password: Type.String({ minLength: 1 }),
     clientId: Type.String({ minLength: 1 }),
+    clientSecret: Type.String({ minLength: 1 }),
 });
 export type loginBodyInput = Static<typeof LoginBodyDto>;
 export const LoginRouteSchema = {
@@ -62,6 +63,7 @@ export const LoginRouteSchema = {
  */
 export const LogoutBodyDto = Type.Object({
     clientId: Type.String({ minLength: 1 }),
+    clientSecret: Type.String({ minLength: 1 }),
     refreshToken: Type.String({ minLength: 1 }),
 });
 export type logoutBodyInput = Static<typeof LogoutBodyDto>;
@@ -78,6 +80,7 @@ export const LogoutRouteSchema = {
 export const RefreshTokenBodyDto = Type.Object({
     refreshToken: Type.String({ minLength: 1 }),
     clientId: Type.String({ minLength: 1 }),
+    clientSecret: Type.String({ minLength: 1 }),
 });
 export type refreshTokenBodyInput = Static<typeof RefreshTokenBodyDto>;
 export const RefreshTokenRouteSchema = {

@@ -1,5 +1,6 @@
 model Client {
   clientId   String  @id @map("client_id") @db.VarChar(50)
+  clientSecret  String         @map("client_secret") @db.VarChar(50)
   clientName String  @map("client_name") @db.VarChar(100)
   description String? @db.Text
 

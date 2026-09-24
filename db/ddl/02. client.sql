@@ -1,5 +1,6 @@
 CREATE TABLE clients (
     client_id VARCHAR(50) PRIMARY KEY,
+    client_secret VARCHAR(50) NOT NULL,
     client_name VARCHAR(100) NOT NULL,
     description TEXT,
     

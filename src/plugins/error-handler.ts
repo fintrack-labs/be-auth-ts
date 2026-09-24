@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 export default fp(async (fastify: FastifyInstance) => {
     fastify.setErrorHandler(
         (error: Error & { statusCode?: number; validation?: unknown }, request: FastifyRequest, reply: FastifyReply) => {
+            console.log('DEBUG ERROR', error);
             if (error instanceof AppError) {
                 return reply.status(error.statusCode).send({
                     statusCode: error.statusCode,

@@ -102,6 +102,7 @@ export async function registerUserService(fastify: FastifyInstance, payload: Reg
 }
 
 export async function loginUserService(fastify: FastifyInstance, input: loginBodyInput) {
+    const client = await checkClientId(fastify, input.clientId, input.clientSecret);
     const user = await fastify.prisma.user.findFirst({
         where: {
             email: input.email,
@@ -118,8 +119,6 @@ export async function loginUserService(fastify: FastifyInstance, input: loginBod
     if (!isPasswordValid) {
         throw new UnauthorizedError('Invalid credentials');
     }
-
-    const client = await checkClientId(fastify, input.clientId);
 
     const accessToken = await generateAccessToken({
         userId: user.userId,
@@ -151,22 +150,24 @@ export async function loginUserService(fastify: FastifyInstance, input: loginBod
     };
 }
 
-async function checkClientId(fastify: FastifyInstance, clientId: string) {
-    const client = await fastify.prisma.client.findUnique({
+async function checkClientId(fastify: FastifyInstance, clientId: string, clientSecret: string) {
+    const client = await fastify.prisma.client.findFirst({
         where: {
             clientId: clientId,
+            clientSecret: clientSecret,
+            isDeleted: false,
         },
     });
 
     if (!client) {
-        throw new UnauthorizedError('Client ID not registered');
+        throw new UnauthorizedError('Client ID or secret not registered');
     }
 
     return client;
 }
 
 export async function logoutUserService(fastify: FastifyInstance, input: logoutBodyInput) {
-    await checkClientId(fastify, input.clientId);
+    await checkClientId(fastify, input.clientId, input.clientSecret);
     const refreshTokenHash = createHash('sha256').update(input.refreshToken).digest('hex');
     const isExist = await fastify.prisma.refreshToken.findUnique({
         where: {
@@ -197,7 +198,7 @@ export async function logoutUserService(fastify: FastifyInstance, input: logoutB
 }
 
 export async function refreshTokenService(fastify: FastifyInstance, input: refreshTokenBodyInput) {
-    await checkClientId(fastify, input.clientId);
+    await checkClientId(fastify, input.clientId, input.clientSecret);
     const refreshTokenHash = createHash('sha256').update(input.refreshToken).digest('hex');
     const refreshToken = await fastify.prisma.refreshToken.findFirst({
         where: {
