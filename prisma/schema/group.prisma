@@ -1,0 +1,18 @@
+model Group {
+  groupId     String   @id @map("group_id") @db.VarChar(50)
+  groupName   String   @unique @map("group_name") @db.VarChar(100)
+  description String?  @db.Text
+
+  // Kolom Audit
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdBy String?  @map("created_by") @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String?  @map("updated_by") @db.VarChar(50)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy String?  @map("deleted_by") @db.VarChar(50)
+  isDeleted Boolean  @default(false) @map("is_deleted")
+
+  userGroups UserGroup[]
+
+  @@map("groups")
+}

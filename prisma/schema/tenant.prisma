@@ -1,0 +1,15 @@
+model Tenant {
+  id       String  @id @map("id") @db.VarChar(64)
+  name     String  @map("name") @db.VarChar(255)
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  createdBy String?   @map("created_by") @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  updatedBy String?   @map("updated_by") @db.VarChar(50)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy String?   @map("deleted_by") @db.VarChar(50)
+  isDeleted Boolean   @default(false) @map("is_deleted")
+
+  @@map("tenants")
+}

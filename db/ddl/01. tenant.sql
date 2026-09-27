@@ -1,0 +1,12 @@
+CREATE TABLE tenants (
+    id VARCHAR(64) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by VARCHAR(50),
+    updated_at TIMESTAMP WITH TIME ZONE,
+    updated_by VARCHAR(50),
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    deleted_by VARCHAR(50),
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL
+);
