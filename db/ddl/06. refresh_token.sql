@@ -1,7 +1,7 @@
 CREATE TABLE refresh_tokens (
     token_id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(64) NOT NULL REFERENCES "fintrack-labs".users(user_id) ON DELETE CASCADE,
-    client_id VARCHAR(50) NOT NULL REFERENCES "fintrack-labs".clients(client_id) ON DELETE CASCADE,
+    user_id VARCHAR(64) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    client_id VARCHAR(50) NOT NULL REFERENCES clients(client_id) ON DELETE CASCADE,
     token_hash VARCHAR(255) NOT NULL UNIQUE,
     is_revoked BOOLEAN DEFAULT FALSE NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,

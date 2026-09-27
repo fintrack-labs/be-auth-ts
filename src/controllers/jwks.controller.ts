@@ -20,7 +20,7 @@ export async function getJwksHandler(request: FastifyRequest, reply: FastifyRepl
                     kty: 'RSA',
                     use: 'sig',
                     alg: 'RS256',
-                    kid: 'fintrack-auth-key-v1'
+                    kid: process.env.TOKEN_KID
                 }
             ]
         };
