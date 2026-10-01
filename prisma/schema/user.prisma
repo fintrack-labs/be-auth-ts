@@ -3,7 +3,10 @@ model User {
   name      String   @db.VarChar(100)
   email     String   @unique @db.VarChar(150)
   password  String   @db.VarChar(255)
-  status    String   @default("ACTIVE") @db.VarChar(20)
+  status    String   @default("REGISTERED") @db.VarChar(20)
+  activationTokenHash      String?  @map("activation_token_hash") @db.VarChar(64)
+  activationTokenExpiresAt DateTime? @map("activation_token_expires_at") @db.Timestamptz
+  lastLoginAttemptAt DateTime? @map("last_login_attempt_at") @db.Timestamptz
 
   // Kolom Audit (Harus ditulis, tapi terisolasi di file ini saja)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz

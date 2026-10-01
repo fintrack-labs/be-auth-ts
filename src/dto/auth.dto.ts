@@ -6,6 +6,20 @@ export const RegisterBodyDto = Type.Object({
     name: Type.String({ minLength: 2, maxLength: 100 }),
 });
 export type RegisterBodyInput = Static<typeof RegisterBodyDto>;
+
+export const ActivationRouteSchema = {
+    tags: ['Auth'],
+    summary: 'Activate registered user email',
+    querystring: Type.Object({ token: Type.String({ minLength: 64, maxLength: 64 }) }),
+    response: {
+        200: Type.Object({
+            statusCode: Type.Number({ default: 200 }),
+            message: Type.String(),
+            data: Type.Object({ message: Type.String() }),
+        }),
+    },
+};
+
 export const RegisterRouteDto = {
     tags: ['Auth'],
     summary: 'Register New User',
@@ -22,6 +36,7 @@ export const RegisterRouteDto = {
                     status: Type.String(),
                     createdAt: Type.Optional(Type.String()),
                 }),
+                activationToken: Type.Optional(Type.String({ minLength: 64, maxLength: 64 })),
             }),
         }),
         409: Type.Object({
@@ -54,6 +69,11 @@ export const LoginRouteSchema = {
                 tokenType: Type.String({ example: 'Bearer' }),
                 expiresIn: Type.Number({ example: 3600 }),
             }),
+        }),
+        429: Type.Object({
+            statusCode: Type.Number({ default: 429 }),
+            error: Type.String(),
+            message: Type.String(),
         }),
     },
 };
