@@ -1,10 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { loginBodyInput, logoutBodyInput, refreshTokenBodyInput, RegisterBodyInput } from "../dto/auth.dto.ts";
 import { hashPassword } from "../utils/crypto.ts";
-import { ConflictError, UnauthorizedError } from "../errors/app.error.ts";
+import { ConflictError, TooManyRequestsError, UnauthorizedError } from "../errors/app.error.ts";
 import { generateAccessToken, verifyPassword } from "../utils/auth.util.ts";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { RESPONSE_SUCESS } from "../config/app.contants.ts";
+import { sendActivationEmail } from "./email.service.ts";
+import { BadRequestError } from "../errors/app.error.ts";
 
 export type RolePrefix = '12' | '10' | '01';
 
@@ -75,6 +77,8 @@ export async function registerUserService(fastify: FastifyInstance, payload: Reg
 
     const passwordHash = await hashPassword(password);
     const newUserId = await generateUserId(fastify, ROLE_PREFIXES.USER);
+    const activationToken = randomBytes(32).toString('hex');
+    const activationTokenHash = createHash('sha256').update(activationToken).digest('hex');
 
     const user = await fastify.prisma.user.create({
         data: {
@@ -83,6 +87,8 @@ export async function registerUserService(fastify: FastifyInstance, payload: Reg
             password: passwordHash,
             name,
             status: USER_STATUS.REGISTERED,
+            activationTokenHash,
+            activationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
         select: {
             userId: true,
@@ -93,12 +99,41 @@ export async function registerUserService(fastify: FastifyInstance, payload: Reg
         },
     });
 
+    void sendActivationEmail(email, name, newUserId, activationToken).catch((error: unknown) => {
+        fastify.log.error({ err: error, userId: newUserId }, 'Failed to send activation email');
+    });
+
     return {
         user: {
             ...user,
             createdAt: user.createdAt ? user.createdAt.toISOString() : undefined,
         },
+        ...(process.env.EXPOSE_ACTIVATION_TOKEN === 'true' ? { activationToken } : {}),
     };
+}
+
+export async function activateUserService(fastify: FastifyInstance, token: string) {
+    const activationTokenHash = createHash('sha256').update(token).digest('hex');
+    const now = new Date();
+    const result = await fastify.prisma.user.updateMany({
+        where: {
+            activationTokenHash,
+            activationTokenExpiresAt: { gt: now },
+            status: USER_STATUS.REGISTERED,
+            isDeleted: false,
+        },
+        data: {
+            status: USER_STATUS.ACTIVE,
+            activationTokenHash: null,
+            activationTokenExpiresAt: null,
+        },
+    });
+
+    if (result.count !== 1) {
+        throw new BadRequestError('Activation link is invalid, expired, or already used');
+    }
+
+    return { message: 'Email verified. Your account is active.' };
 }
 
 export async function loginUserService(fastify: FastifyInstance, input: loginBodyInput) {
@@ -113,6 +148,25 @@ export async function loginUserService(fastify: FastifyInstance, input: loginBod
 
     if (!user) {
         throw new UnauthorizedError('User not registered');
+    }
+
+    const attemptedAt = new Date();
+    const retryAfter = new Date(attemptedAt.getTime() - 2000);
+    const attemptWindow = await fastify.prisma.user.updateMany({
+        where: {
+            userId: user.userId,
+            status: USER_STATUS.ACTIVE,
+            isDeleted: false,
+            OR: [
+                { lastLoginAttemptAt: null },
+                { lastLoginAttemptAt: { lte: retryAfter } },
+            ],
+        },
+        data: { lastLoginAttemptAt: attemptedAt },
+    });
+
+    if (attemptWindow.count !== 1) {
+        throw new TooManyRequestsError('Please wait 2 seconds before trying to log in again');
     }
 
     const isPasswordValid = await verifyPassword(input.password, user.password);
@@ -222,11 +276,13 @@ export async function refreshTokenService(fastify: FastifyInstance, input: refre
         select: {
             email: true,
             name: true,
+            status: true,
+            isDeleted: true,
         }
     });
 
-    if (!userData) {
-        throw new UnauthorizedError('User not found');
+    if (!userData || userData.status !== USER_STATUS.ACTIVE || userData.isDeleted) {
+        throw new UnauthorizedError('Invalid credentials');
     }
 
     const accessToken = await generateAccessToken({

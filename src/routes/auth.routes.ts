@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getJwksHandler } from '../controllers/jwks.controller.ts';
-import { loginHandler, logoutHandler, refreshTokenHandler, registerHandler } from '../controllers/auth.controller.ts';
-import { LoginRouteSchema, LogoutRouteSchema, RefreshTokenRouteSchema, RegisterRouteDto } from '../dto/auth.dto.ts';
+import { activateHandler, loginHandler, logoutHandler, refreshTokenHandler, registerHandler } from '../controllers/auth.controller.ts';
+import { ActivationRouteSchema, LoginRouteSchema, LogoutRouteSchema, RefreshTokenRouteSchema, RegisterRouteDto } from '../dto/auth.dto.ts';
 
 export async function authRoutes(server: FastifyInstance) {
     server.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -12,6 +12,7 @@ export async function authRoutes(server: FastifyInstance) {
         };
     });
     server.get('/.well-known/jwks.json', getJwksHandler);
+    server.get('/activate', { schema: ActivationRouteSchema }, activateHandler);
     // server.post('/register', { schema: RegisterRouteDto }, registerHandler);
     server.post('/login', { schema: LoginRouteSchema }, loginHandler);
     server.post('/logout', { schema: LogoutRouteSchema }, logoutHandler);
