@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { loginBodyInput, logoutBodyInput, refreshTokenBodyInput, RegisterBodyInput } from "../dto/auth.dto.ts";
-import { loginUserService, logoutUserService, refreshTokenService, registerUserService } from "../services/auth.service.ts";
+import { activateUserService, loginUserService, logoutUserService, refreshTokenService, registerUserService } from "../services/auth.service.ts";
 import { RESPONSE_SUCESS } from "../config/app.contants.ts";
 
 export async function registerHandler(
@@ -9,6 +9,18 @@ export async function registerHandler(
     const result = await registerUserService(request.server, request.body);
     return reply.status(201).send({
         statusCode: 201,
+        message: RESPONSE_SUCESS,
+        data: result,
+    });
+}
+
+export async function activateHandler(
+    request: FastifyRequest<{ Querystring: { token: string } }>,
+    reply: FastifyReply
+) {
+    const result = await activateUserService(request.server, request.query.token);
+    return reply.status(200).send({
+        statusCode: 200,
         message: RESPONSE_SUCESS,
         data: result,
     });

@@ -7,8 +7,11 @@ export interface UserModel extends AuditSoftDeleteEntity {
     name: string;
     email: string;
     password: string;
-    adGroups: string[];
+    adGroups?: string[];
     status: string;
+    activationTokenHash?: string | null;
+    activationTokenExpiresAt?: Date | null;
+    lastLoginAttemptAt?: Date | null;
     groups?: GroupModel[];
     refreshTokens?: RefreshTokenModel[];
 }
